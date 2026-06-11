@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 
@@ -12,9 +13,9 @@ use Illuminate\Support\Facades\Crypt;
  * @property string|null $refresh_token   encrypted
  * @property string|null $token_type
  * @property int|null    $expires_in
- * @property \Carbon\CarbonImmutable|null $expires_at
- * @property \Carbon\CarbonImmutable $created_at
- * @property \Carbon\CarbonImmutable $updated_at
+ * @property CarbonImmutable|null $expires_at
+ * @property CarbonImmutable $created_at
+ * @property CarbonImmutable $updated_at
  */
 class OAuthToken extends Model
 {
@@ -34,10 +35,6 @@ class OAuthToken extends Model
         'expires_in' => 'integer',
     ];
 
-    // ──────────────────────────────────────────────
-    // Encrypt / decrypt access_token transparently
-    // ──────────────────────────────────────────────
-
     public function setAccessTokenAttribute(string $value): void
     {
         $this->attributes['access_token'] = Crypt::encryptString($value);
@@ -47,10 +44,6 @@ class OAuthToken extends Model
     {
         return Crypt::decryptString($value);
     }
-
-    // ──────────────────────────────────────────────
-    // Encrypt / decrypt refresh_token transparently
-    // ──────────────────────────────────────────────
 
     public function setRefreshTokenAttribute(?string $value): void
     {
@@ -62,24 +55,17 @@ class OAuthToken extends Model
         return $value ? Crypt::decryptString($value) : null;
     }
 
-    // ──────────────────────────────────────────────
-    // Helpers
-    // ──────────────────────────────────────────────
-
-    public function isExpired(): bool
+    public function estaExpirado(): bool
     {
         return $this->expires_at !== null && $this->expires_at->isPast();
     }
 
-    public function isValid(): bool
+    public function esValido(): bool
     {
-        return ! $this->isExpired();
+        return ! $this->estaExpirado();
     }
 
-    /**
-     * Find the latest token for a given provider, or null.
-     */
-    public static function forProvider(string $provider): ?self
+    public static function paraProveedor(string $provider): ?self
     {
         return static::where('provider', $provider)
             ->latest()

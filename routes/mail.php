@@ -1,28 +1,16 @@
 <?php
 
-use App\Http\Controllers\OAuthController;
-use App\Livewire\MailSearch;
+use App\Http\Controllers\ControladorOAuth;
+use App\Livewire\BusquedaCorreo;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Mail Extractor Routes
-|--------------------------------------------------------------------------
-|
-| These routes are public for development purposes.
-| In production you would wrap them in an auth middleware.
-|
-*/
+Route::get('/correo', BusquedaCorreo::class)->name('correo.buscar');
 
-// ── Main search page (Livewire) ──────────────────────────────────────────
-Route::get('/mail', MailSearch::class)->name('mail.search');
+Route::get('/oauth/{provider}/redirect', [ControladorOAuth::class, 'redirigir'])
+    ->name('oauth.redirigir');
 
-// ── OAuth flow ───────────────────────────────────────────────────────────
-Route::get('/oauth/{provider}/redirect', [OAuthController::class, 'redirect'])
-    ->name('oauth.redirect');
+Route::get('/oauth/{provider}/callback', [ControladorOAuth::class, 'retorno'])
+    ->name('oauth.retorno');
 
-Route::get('/oauth/{provider}/callback', [OAuthController::class, 'callback'])
-    ->name('oauth.callback');
-
-Route::get('/oauth/{provider}/disconnect', [OAuthController::class, 'disconnect'])
-    ->name('oauth.disconnect');
+Route::get('/oauth/{provider}/disconnect', [ControladorOAuth::class, 'desconectar'])
+    ->name('oauth.desconectar');
